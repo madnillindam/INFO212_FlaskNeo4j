@@ -1,8 +1,5 @@
-car_id,make,model,reg,year,capacity,location,status
-111,VW,Golf,EE55544,1984,5,Bergen,available
-112,Toyota,Corolla,BA29874,1991,5,Bergen,available
-113,Bentley,Continental GT,SS98342,2002,4,Bergen,available
-114,Fiat,126P,BT98424,1993,4,Bergen,available
-115,Citroen,C6,LO09224,2009,5,Bergen,available
-116,Ford ,S-Max,NT32155,2012,7,Bergen,available
-117,Nissan,Leaf,OO02842,2015,5,Bergen,available
+car_state;location;year;model;make;car_id
+booked;Unknown_location;2018;One-77;Aston Martin;001
+available;Unknown_location;1993;XJ220;Jaguar;002
+rented;Unknown_location;1963;MKII 289;AC Cobra;003
+damaged;Unknown_location;1969;Stingray;Corvette;004
