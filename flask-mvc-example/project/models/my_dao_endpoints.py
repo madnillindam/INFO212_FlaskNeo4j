@@ -221,14 +221,15 @@ def check_eligibility(customer_id):
 def generate_order_id():
     return(random.randint(100000,999999))
 
-#sjekk om det finnes en ordre med den kunden og den bilen - funker ikke helt
-def order_exists(customer_id,car_id):
+#sjekk om det finnes en ordre med den kunden og den bilen - returnerer en streng, siden vi ikke får lov til å returnere bl.a. bool og int 
+def order_exists(car_id,customer_id):
     with get_connection().session() as session: 
-        order_id = session.run("MATCH (n:Order) WHERE n.customer_id = $customer_id AND n.car_id= $car_id RETURN n.order_id",customer_id=customer_id,car_id=car_id)
-        print(type(order_id))
-        print(order_id)
- 
-        return(order_id)
+        order = session.run("MATCH (n:Order) WHERE n.customer_id = $customer_id AND n.car_id= $car_id RETURN n",customer_id=customer_id,car_id=car_id)
+        print(type(order))
+        print(order)
+        nodes_json = [node_to_json(record["n"]) for record in order]
+        return(nodes_json)
+
 
 
 
@@ -237,7 +238,7 @@ def order_exists(customer_id,car_id):
 def make_order(car_id,customer_id):
     print("make order")
     #sjekk om forholdene ligger til rette
-    if  check_availability(car_id) == "available": #and check_eligibility(customer_id) == "no":
+    if  check_availability(car_id) == "available" and check_eligibility(customer_id) == "no":
 
         with get_connection().session() as session:
             order_id = generate_order_id()
@@ -261,24 +262,37 @@ def findAllOrders():
 
 # CANCEL ORDER CAR
 
-#må taste inn både ordrenummer og bilnummer
-def cancel_order_car(customer_id,car_id):
-    if order_exists(customer_id,car_id) == 'yes':
+#må taste inn både bilnummer og kundenummer, siden det er det oppgaven ber om. Funker nå
+def cancel_order_car(car_id,customer_id):
+    order = order_exists(car_id,customer_id)
+    if len(order)>0:
+        order_id = order[0]["order_id"]
+        
+        
         with get_connection().session() as session:
+            session.run("MATCH (o:Order {order_id: $order_id}) DELETE o;",order_id=order_id)
             session.run("MATCH (a:Cars{car_id: $car_id}) SET a.car_state='available'",car_id=car_id)
-            return("order cancelled")
+            session.run("MATCH (c:Customer{customer_id: $customer_id}) SET c.is_renting='no'",customer_id=customer_id)
+            print("order was cancelled")
+            return("order was cancelled")
     else:
         return("no such order")
   
 # RENT CAR
 
-def rent_car(order_id):
+def rent_car(car_id,customer_id):
+
     return()
 
 # RETURN CAR
 
 def return_car(order_id):
     return()
+
+
+#HJELPEFUNKSJONER
+
+#gjør alle biler tilgjengelige
 
 
 
