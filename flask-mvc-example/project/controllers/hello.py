@@ -255,7 +255,7 @@ def get_orders():
     return findAllOrders()
 
 #cancel order
-@app.route("/cancel_order/<int:customer_id>/<int:car_id>", methods=["POST"])
+@app.route("/cancel_order/<int:car_id>/<int:customer_id>", methods=["POST"])
 def delete_order(car_id,customer_id):
     return cancel_order_car(car_id=car_id,customer_id=customer_id)
 
@@ -269,8 +269,14 @@ def available(car_id):
     
     return check_availability(car_id=car_id)
 
-@app.route("/check_order/<int:customer_id>/<int:car_id>", methods=["GET"])    
-def is_order(customer_id,car_id):
+@app.route("/check_eligibility/<int:customer_id>", methods=["GET"])    
+def eligible(customer_id):
 
     
-    return order_exists(customer_id=customer_id,car_id=car_id)
+    return check_eligibility(customer_id=customer_id)
+
+@app.route("/check_order/<int:car_id>/<int:customer_id>/", methods=["GET"])    
+def is_order(car_id,customer_id):
+
+    
+    return order_exists(car_id=car_id,customer_id=customer_id)
