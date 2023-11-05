@@ -190,6 +190,7 @@ def delete_customer():
 # Get all employees 
 @app.route("/get_employees", methods=["GET"])
 def query_employees():
+    print("kjører query_employees")
     return findAllEmployees()
 
 # Returnerer json av en customer (http://localhost:8000//get_employee_by_emp_id/2)
@@ -241,10 +242,35 @@ def delete_employee_info():
     return delete_employee(emp_id = emp_id, name = name, address = address, branch = branch)
 
 
-@app.route("/order_car/<int:customer_id>/<int:car_id>", methods=["GET"])
-def get_car_order(customer_id, car_id):
+###ORDERS###
+
+#make order
+@app.route("/make_order/<int:car_id>/<int:customer_id>", methods=["POST"])
+def create_order(car_id,customer_id):
+    return make_order(car_id=car_id,customer_id=customer_id)
+
+#list all orders
+@app.route("/get_orders", methods=["GET"])
+def get_orders():
+    return findAllOrders()
+
+#cancel order
+@app.route("/cancel_order/<int:customer_id>/<int:car_id>", methods=["POST"])
+def delete_order(car_id,customer_id):
+    return cancel_order_car(car_id=car_id,customer_id=customer_id)
+
+
+
+###DIV TESTER###
+
+@app.route("/check_availability/<int:car_id>", methods=["GET"])    
+def available(car_id):
+
     
-    return order_car(customer_id=customer_id, car_id=car_id)
+    return check_availability(car_id=car_id)
 
+@app.route("/check_order/<int:customer_id>/<int:car_id>", methods=["GET"])    
+def is_order(customer_id,car_id):
 
-
+    
+    return order_exists(customer_id=customer_id,car_id=car_id)
