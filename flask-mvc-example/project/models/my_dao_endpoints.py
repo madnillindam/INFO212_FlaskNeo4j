@@ -3,6 +3,7 @@ from neo4j import GraphDatabase, Driver, AsyncGraphDatabase, AsyncDriver
 import json
 from project.models.User import User, Car, Customer, Employee
 import re
+import random
 
 # CONNECT TO DB
 URI = "neo4j+ssc://5b571bf5.databases.neo4j.io"
@@ -57,7 +58,8 @@ def findAllCars():
 def findCarbyIdNumber(car_id):
     with get_connection().session() as session:
         cars = session.run("MATCH (c:Cars{car_id: $car_id}) return c;", car_id=car_id)
-
+        print(type(cars))
+        print(cars)
         nodes_json = [node_to_json(record["c"]) for record in cars]
         print(nodes_json)
         return nodes_json
@@ -154,7 +156,8 @@ def delete_customer(customer_id):
 def findAllEmployees():
     with get_connection().session() as session:
         employees = session.run("MATCH(c:Employee) RETURN c;")
-
+        print(type(employees))
+        print(employees)
         nodes_json = [node_to_json(record["c"]) for record in employees]
         print_json(nodes_json)
         return nodes_json
@@ -199,47 +202,122 @@ def delete_employee(emp_id, name, address, branch):
 
 ### ACTIONS ###
 
+
+
+#FUNKSJONER TIL ORDERS#
+
+#sjekk om bil er tilgjengelig
+def check_availability(car_id):
+   
+    return(findCarbyIdNumber(car_id)[0]["car_state"])
+
+
+#sjekk om kunde ikke allerede leier en bil 
+def check_eligibility(customer_id):
+
+    return(findCustomerbyIdNumber(customer_id)[0]["is_renting"])
+
+#skulle kanskje hatt 100% sikkerhet for unike ordrenummer,men 89,9999% får duge
+def generate_order_id():
+    return(random.randint(100000,999999))
+
+#sjekk om det finnes en ordre med den kunden og den bilen - funker ikke helt
+def order_exists(customer_id,car_id):
+    with get_connection().session() as session: 
+        order_id = session.run("MATCH (n:Order) WHERE n.customer_id = $customer_id AND n.car_id= $car_id RETURN n.order_id",customer_id=customer_id,car_id=car_id)
+        print(type(order_id))
+        print(order_id)
+ 
+        return(order_id)
+
+
+
 # ORDER CAR
-# params: customer_id & car_id
-# condition: customer_id has not booked other cars
-# booked car: car_state = booked (instead of available)
 
-def order_car(customer_id, car_id):
+def make_order(car_id,customer_id):
+    print("make order")
+    #sjekk om forholdene ligger til rette
+    if  check_availability(car_id) == "available": #and check_eligibility(customer_id) == "no":
 
-    customer = findCustomerbyIdNumber(customer_id)
-    car = findCarbyIdNumber(car_id)
+        with get_connection().session() as session:
+            order_id = generate_order_id()
+            order = session.run("CREATE (c:Order {order_id: $order_id, customer_id: $customer_id,car_id: $car_id}) RETURN c;",
+                                order_id=order_id,customer_id=customer_id,car_id=car_id )
+            nodes_json = ([node_to_json(record["c"]) for record in order])
+            session.run("MATCH (a:Cars{car_id: $car_id}) SET a.car_state='booked'",car_id=car_id)
+            return(nodes_json) 
+    else:
+        return ("Terribly sorry, but conditions aren't met")
 
-    # Query db: 
-    #with get_connection().session as session:
-        #has_rel = session.run("MATCH c:Customer=()-[r:RENTED]->() RETURN c;")
+# GET ALL ORDERS
 
-        #nodes_json = [node_to_json(record["c"]) for record in has_rel]
-        #print(nodes_json)
+def findAllOrders():
+    with get_connection().session() as session:
+        orders = session.run("MATCH(c:Order) RETURN c;")
 
-    if car[0]["car_state"] == "booked":
-        print(f"Car is already booked: ", car)
-
-    print(type(customer[0]["email"]))
-    customer2 = customer[0]["email"]
-
-    return f"Customer: {customer}, {customer2} \nCar: {car}"           # Printes i browser
-    
-    # TODO Legge til renting-relasjon status på Customer-nodene
-    
-    # if customer.can_rent = True:
-    #     rent_car(...)
-    #     return car.car_state = "booked"
-
+        nodes_json = [node_to_json(record["c"]) for record in orders]
+        print_json(nodes_json)
+        return nodes_json 
 
 # CANCEL ORDER CAR
 
-
+#må taste inn både ordrenummer og bilnummer
+def cancel_order_car(customer_id,car_id):
+    if order_exists(customer_id,car_id) == 'yes':
+        with get_connection().session() as session:
+            session.run("MATCH (a:Cars{car_id: $car_id}) SET a.car_state='available'",car_id=car_id)
+            return("order cancelled")
+    else:
+        return("no such order")
+  
 # RENT CAR
 
-
+def rent_car(order_id):
+    return()
 
 # RETURN CAR
 
+def return_car(order_id):
+    return()
+
+
+
+#opprett relasjon 
+def make_relation():
+    car_id=22
+    customer_id=5000
+    with get_connection().session() as session:
+        session.run("MATCH (Cars {car_id: 4}), (Customer {customer_id: 60}) CREATE (Customer)-[:KRÆSJET]->(Cars)") 
+        return 'relasjon opprettet'
+
+#hent relasjoner (funkar inte)
+def findAllRelations():
+    print('første')
+    with get_connection().session() as session:
+        print('andre')
+        relations = session.run("MATCH (a)-[r]-(c) RETURN *")
+        print("RELATIONS TYPE:\n",type(relations))
+        for record in relations:
+            print('tredje')
+            print(type(record)) 
+            print(record)
+            print(record[0])
+            for i in record:
+                print("ting:",i)
+
+        nodes_json = [node_to_json(record[0]) for record in relations]
+        print_json(nodes_json)
+        return nodes_json
+
+#sjekk om kunde inngår i relasjon
+def check_relation():
+    with get_connection().session() as session:
+        session.run("MATCH (Cars {car_id: 4}), (Customer {customer_id: 60}) CREATE (Customer)-[:KRÆSJET]->(Cars)") 
+
+#slett relasjon
+def delete_relation():
+        with get_connection().session() as session:
+            session.run("")
 
 
 
