@@ -291,11 +291,6 @@ def return_car(car_id,customer_id,car_state):
     else:
         return("no such order")
     
-#HJELPEFUNKSJONER
-
-#gjør alle biler tilgjengelige
-
-#sett alle 
 
 
 
