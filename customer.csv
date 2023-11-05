@@ -1,8 +1,6 @@
-address;age;email;name;customer_id
-20 Ingram St New York;28;peter@parker.com;Peter Parker;1000
-417 5th Avenue Apartment 10B, New York;56;carol@danvers.com;Carol Danvers;2000
-Rocinha Rio de Janeiro;54;bruce@banner.com;Bruce Banner;3000
-2800 Sherwood Drive Westview, New Jersey;34;wanda@maximoff.com;Wanda Maximoff;4000
-London SW1A 1AA;47;elizabeth@braddock.com;Betsy Braddock;5000
-
-
+address;age;email;name;customer_id;is_renting
+20 Ingram St New York;28;peter@parker.com;Peter Parker;1000;"no"
+417 5th Avenue Apartment 10B, New York;56;carol@danvers.com;Carol Danvers;2000;"no"
+Rocinha Rio de Janeiro;54;bruce@banner.com;Bruce Banner;3000;"no"
+2800 Sherwood Drive Westview, New Jersey;34;wanda@maximoff.com;Wanda Maximoff;4000;"no"
+London SW1A 1AA;47;elizabeth@braddock.com;Betsy Braddock;5000;"no"
